@@ -30,6 +30,210 @@ A Claude Code configuration template for writing scientific papers in LaTeX. Dro
 
 ---
 
+## Using the skills
+
+Each skill is a slash command you type in Claude Code. Most skills need a few pieces of information upfront — provide them in the same message to avoid extra back-and-forth.
+
+---
+
+### `/find-annotations`
+
+Scans all `.tex` files for `\todo`, `\revise`, `\red`, and per-author comments. Run this at the start of every writing session.
+
+```
+/find-annotations
+```
+
+No arguments needed. Example output:
+
+```
+### \todo  (2 open)
+- introduction.tex:42  — "add citation for claim about X"
+- approach.tex:118     — "clarify the role of the resolution model here"
+
+### \revise  (1 open)
+- evaluation.tex:73    — "this paragraph is too vague"
+
+Total: 3 annotations across 2 files.
+```
+
+---
+
+### `/paper-build`
+
+Builds the PDF and runs chktex lint. Run after any substantive edit.
+
+```
+/paper-build
+```
+
+Reports build errors, lint warnings, undefined references, and missing citations.
+
+---
+
+### `/section-review`
+
+Audits a full section for scientific quality and consistency with the rest of the manuscript. Reports only — no file changes.
+
+**Minimal invocation:**
+```
+/section-review
+
+Target: approach.tex — Section 3: Method
+Neighbouring sections: background.tex (before), evaluation.tex (after)
+```
+
+**With a specific concern:**
+```
+/section-review
+
+Target: evaluation.tex — Section 5: Results
+Neighbouring sections: method.tex (before), conclusion.tex (after)
+Focus: check that the metrics described here are consistent with how
+       they were defined in Section 3, and that the contributions
+       stated in the introduction are all addressed.
+```
+
+The skill produces a unified report with a READY / NEEDS REVISION / MAJOR ISSUES verdict.
+
+---
+
+### `/write-to-intent`
+
+Writes or substantially rewrites a passage toward a stated rhetorical goal. Proposes multiple approach directions, waits for your pick, then drafts and refines without touching the file until you approve.
+
+**New passage:**
+```
+/write-to-intent
+
+Goal: Write a paragraph opening Section 2 that motivates why existing
+      planning approaches fail under uncertainty, setting up our contribution.
+
+Target: background.tex:1 (insert before first paragraph)
+Context: background.tex:1–30 (what follows)
+Constraints: must use the term "tactical retreat"; must not claim we
+             solve the general case.
+```
+
+**Rewriting an existing paragraph:**
+```
+/write-to-intent
+
+Goal: Rewrite the related work subsection intro so it identifies the gap
+      our approach fills, rather than just summarizing prior work.
+
+Target: related_work.tex:45 (existing intro paragraph, lines 45–58)
+Context: related_work.tex:40–70
+```
+
+After answering a few clarifying questions, you will be shown 2-3 approach directions. You pick one (or more), and the skill produces full draft proposals for your approval.
+
+---
+
+### `/address-reviewer-comment`
+
+Responds to a reviewer comment targeting a specific paragraph. Generates revision strategies, produces full rewrites, reviews them in parallel, and holds for your approval.
+
+**Writing/clarity comment:**
+```
+/address-reviewer-comment
+
+Comment: "The paragraph beginning 'The system derives...' is circular —
+it explains the output in terms of itself without defining the mechanism."
+
+Target: method.tex:88 (paragraph lines 88–97)
+Context: method.tex:80–110
+Comment type: writing
+```
+
+**Technical/factual comment:**
+```
+/address-reviewer-comment
+
+Comment: "The claim that all reachable nodes are visited in O(n) is
+not justified. The proof sketch in Section 4 only covers the acyclic case."
+
+Target: method.tex:201 (lines 201–210)
+Context: method.tex:195–220
+Comment type: technical
+```
+
+For `technical` comments, the skill first runs an implementation check (if configured) before proposing rewrites. For `writing` or `consistency` comments, it skips straight to revision strategies.
+
+---
+
+### `/technical-paragraph-rewrite`
+
+Verifies a paragraph against the implementation and produces accuracy-corrected rewrite proposals. Only useful if your paper describes a codebase.
+
+```
+/technical-paragraph-rewrite
+
+Paragraph: "The selection function navigates the system graph by following
+interface connections between components, returning the set of all nodes
+reachable within two hops."
+
+Implementation file: src/core/selector.py
+```
+
+The skill reports CONSISTENT / DIVERGES / CANNOT_VERIFY before producing any rewrites.
+
+---
+
+### `/pre-submission`
+
+Full go/no-go pipeline: build, lint, open annotations, consistency audit, and (optionally) implementation alignment spot-check.
+
+```
+/pre-submission
+```
+
+No arguments. The skill runs all sub-steps in order and produces a structured report:
+
+```
+## Pre-Submission Report
+
+| Step           | Status | Notes              |
+|---|---|---|
+| Build          | PASS   |                    |
+| Lint           | PASS   | 0 warnings         |
+| Annotations    | FAIL   | 3 open (\todo × 2) |
+| Consistency    | PASS   |                    |
+| Implementation | SKIP   | not configured     |
+
+### Verdict: NO-GO
+
+Blocking issues:
+- introduction.tex:42  \todo "add citation for claim about X"
+- approach.tex:118     \todo "clarify the role of the resolution model here"
+```
+
+---
+
+### `/sync-remote`
+
+Safe git sync with a remote (Overleaf, GitHub, or any other). Always pulls before pushing, never stages build artifacts.
+
+**Pull from remote:**
+```
+/sync-remote
+
+Action: pull
+```
+
+**Push local changes:**
+```
+/sync-remote
+
+Action: push
+Changed files: introduction.tex, approach.tex
+Commit message: Edit: approach — tighten contribution framing
+```
+
+The skill stages only allowed source file types (`.tex`, `.bib`, figures), reviews what is staged before committing, and stops if conflicts are detected.
+
+---
+
 ## How it works
 
 The skills orchestrate the agents in multi-phase pipelines. For example, `/write-to-intent` runs:
