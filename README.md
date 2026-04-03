@@ -1,6 +1,6 @@
 # scientific-writing-agent
 
-A Claude Code configuration template for writing scientific papers in LaTeX. Drop it into any paper repository and get a multi-agent writing assistant that reviews, rewrites, and audits your manuscript — all without touching a file until you approve.
+A Claude Code and Codex configuration template for writing scientific papers in LaTeX. Drop it into any paper repository and get a multi-agent writing assistant that reviews, rewrites, and audits your manuscript — all without touching a file until you approve.
 
 ---
 
@@ -15,7 +15,7 @@ A Claude Code configuration template for writing scientific papers in LaTeX. Dro
 | `scientific-paper-reviewer` | Critiques a section across five dimensions: clarity, redundancy, claim precision, paragraph flow, and alignment with neighbouring sections. |
 | `paper-implementation-checker` | *(Optional)* Cross-checks a manuscript claim against a software implementation. Only needed if your paper describes a codebase. |
 
-### Skills (slash commands)
+### Skills
 
 | Skill | When to use |
 |---|---|
@@ -32,7 +32,11 @@ A Claude Code configuration template for writing scientific papers in LaTeX. Dro
 
 ## Using the skills
 
-Each skill is a slash command you type in Claude Code. Most skills need a few pieces of information upfront — provide them in the same message to avoid extra back-and-forth.
+In Claude Code, each skill is a slash command you type directly.
+
+In Codex, the same workflows live as repo-local skill specs under `.codex/skills/<skill>/SKILL.md`.
+
+Most skills need a few pieces of information upfront — provide them in the same message to avoid extra back-and-forth.
 
 ---
 
@@ -257,17 +261,17 @@ No file is ever modified without your explicit approval.
 
 See **[SETUP.md](SETUP.md)** for the full step-by-step checklist. The short version:
 
-1. Copy `.claude/` and `CLAUDE.md` into your paper repo.
-2. Replace `<YOUR_PROJECT_ROOT>` in the three agent files with your repo's absolute path.
-3. Create the agent memory directories.
-4. Fill in all `<!-- CUSTOMIZE -->` sections in `CLAUDE.md`.
-5. *(Optional)* Configure the implementation checker if your paper describes a codebase.
+1. Copy `.claude/`, `.codex/`, `CLAUDE.md`, and `AGENTS.md` into your paper repo.
+2. Fill in all `<!-- CUSTOMIZE -->` sections in `CLAUDE.md`, `AGENTS.md`, and `.codex/context/manuscript-context.md`.
+3. Replace any placeholder implementation paths in the optional checker and rewrite workflows if your paper describes a codebase.
+4. If you want Claude's persistent memory, create the `.claude/agent-memory/*/` directories as described in `SETUP.md`.
 
 ---
 
 ## Prerequisites
 
-- [Claude Code](https://claude.ai/code) CLI installed and authenticated.
+- [Claude Code](https://claude.ai/code) CLI installed and authenticated if you want the Claude workflow.
+- Codex available in your environment if you want the Codex workflow.
 - A LaTeX manuscript repository (Overleaf-synced or local).
 - Build tools: `latexmk`, `chktex` (optional but recommended for `/pre-submission`).
 
@@ -279,6 +283,8 @@ Each agent maintains a persistent memory system in `.claude/agent-memory/<agent>
 
 Memory is version-controlled alongside the manuscript, so it persists across machines and collaborators.
 
+For Codex, the analogous durable context is kept repo-local in `.codex/context/manuscript-context.md` rather than per-agent memory directories.
+
 ---
 
 ## Adapting to your project
@@ -286,11 +292,13 @@ Memory is version-controlled alongside the manuscript, so it persists across mac
 The template is designed to be generic. Things you will always customize:
 
 - **CLAUDE.md**: paper title, research questions, document structure, build commands, annotation macros, LaTeX macros.
-- **Agent memory paths**: one `<YOUR_PROJECT_ROOT>` per agent file.
+- **AGENTS.md**: the same manuscript-specific rules for Codex.
+- **`.codex/context/manuscript-context.md`**: stable terminology, notation, and known risks you want Codex to preserve.
+- **Claude agent memory paths**: one `<YOUR_PROJECT_ROOT>` per Claude agent file if you use Claude memory.
 
 Things you customize only if your paper has an associated codebase:
 
-- `paper-implementation-checker.md`: implementation file paths.
-- `technical-paragraph-rewrite`, `write-to-intent`, `address-reviewer-comment`: implementation reference tables.
+- `paper-implementation-checker.md`: implementation file paths in both `.claude/agents/` and `.codex/agents/`.
+- `technical-paragraph-rewrite`, `write-to-intent`, `address-reviewer-comment`: implementation reference tables in both toolchains.
 
 Everything else works out of the box.
