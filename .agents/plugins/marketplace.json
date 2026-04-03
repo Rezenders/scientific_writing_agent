@@ -1,0 +1,20 @@
+{
+  "name": "scientific-writing-repo",
+  "interface": {
+    "displayName": "Scientific Writing Repo Plugins"
+  },
+  "plugins": [
+    {
+      "name": "scientific-writing",
+      "source": {
+        "source": "local",
+        "path": "./plugins/scientific-writing"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}

@@ -4,16 +4,58 @@ Follow these steps when starting a new paper project from this template.
 
 ---
 
+## Preferred: plugin-based bootstrap
+
+If you are using Codex with the repo-local plugin, start with the setup workflow managed by `plugins/scientific-writing/`.
+
+The bundled plugin is registered in the repo-local marketplace at `.agents/plugins/marketplace.json`, so Codex can discover `scientific-writing` without manual path lookup once the repo is opened.
+
+```bash
+python3 plugins/scientific-writing/scripts/setup_paper_project.py --repo-root .
+```
+
+What this does:
+- Creates `.scientific-writing.json` from template on first run (if missing)
+- Generates or refreshes managed setup files (for example `AGENTS.md`, `CLAUDE.md`, `.codex/...`, `.claude/...`)
+
+Rerun workflow:
+- Edit `.scientific-writing.json`
+- Rerun the same command to refresh managed outputs
+
+Plugin mode behavior:
+- Plugin-managed outputs are rewritten on rerun.
+- Manual edits inside plugin-managed output files are overwritten on rerun.
+- In plugin-first mode, prefer customization through `.scientific-writing.json` and plugin templates under `plugins/scientific-writing/assets/templates/root/`, not ad hoc edits to generated files.
+
+How to read Steps 2-9 in plugin-first mode:
+- Treat each step as identifying project-specific values and policy choices.
+- Put config-backed values in `.scientific-writing.json`.
+- When a step says to edit a generated output file, treat that as manual/non-plugin mode unless you intentionally accept overwrite on rerun; for durable plugin-mode changes, edit the corresponding template under `plugins/scientific-writing/assets/templates/root/`.
+
+You can then use the checklist below for manual fine-tuning and optional customizations.
+
+---
+
 ## 1. Copy the template
 
-Copy or clone this repository into your paper project directory. If your paper is already in a git repo, copy the Claude files, the Codex files, and the top-level instruction files you need.
+Copy or clone this repository into your paper project directory. If your paper is already in a git repo, copy the Claude files, the Codex files, the top-level instruction files, and the repo-local plugin files you need.
 
 ```bash
 cp -r scientific_writing_agent/.claude /path/to/your/paper/
 cp -r scientific_writing_agent/.codex /path/to/your/paper/
+mkdir -p /path/to/your/paper/.agents/plugins
+cp scientific_writing_agent/.agents/plugins/marketplace.json /path/to/your/paper/.agents/plugins/
 cp scientific_writing_agent/CLAUDE.md /path/to/your/paper/
 cp scientific_writing_agent/AGENTS.md /path/to/your/paper/
+mkdir -p /path/to/your/paper/plugins
+cp -r scientific_writing_agent/plugins/scientific-writing /path/to/your/paper/plugins/
 ```
+
+If you skip copying `plugins/scientific-writing/`, the plugin bootstrap command
+`python3 plugins/scientific-writing/scripts/setup_paper_project.py --repo-root .`
+will fail because the script and templates are missing.
+
+If you skip copying `.agents/plugins/marketplace.json`, the plugin can still work, but Codex may not discover it automatically from the repo-local marketplace.
 
 ---
 
@@ -24,6 +66,13 @@ The agents use a persistent memory system that requires an **absolute path**. Fi
 ```bash
 # From your paper repo root:
 find .claude/agents -name "*.md" | xargs sed -i 's|<YOUR_PROJECT_ROOT>|'"$(pwd)"'|g'
+```
+
+macOS/BSD `sed` requires an explicit backup suffix argument (empty string means no backup file):
+
+```bash
+# From your paper repo root (macOS/BSD):
+find .claude/agents -name "*.md" | xargs sed -i '' 's|<YOUR_PROJECT_ROOT>|'"$(pwd)"'|g'
 ```
 
 Or edit manually — the placeholder appears once in each of:
@@ -38,6 +87,10 @@ mkdir -p .claude/agent-memory/writer
 mkdir -p .claude/agent-memory/consistency-auditor
 mkdir -p .claude/agent-memory/scientific-paper-reviewer
 ```
+
+Plugin-safe note:
+- The `.claude/agents/*.md` files above are plugin-managed outputs. In plugin-first mode, set persistent edits in `plugins/scientific-writing/assets/templates/root/.claude/agents/*.md.tmpl` and rerun bootstrap.
+- Direct edits in `.claude/agents/*.md` are manual/non-plugin mode unless you accept overwrite on rerun.
 
 ---
 
@@ -94,7 +147,10 @@ Only needed if your paper describes a software implementation:
 - [ ] Open `.claude/skills/write-to-intent/SKILL.md` and update the Phase 1a table.
 - [ ] Open `.codex/skills/write-to-intent/SKILL.md` and update the Phase 1a table.
 
-If you do not have an associated implementation, you can delete the implementation checker and technical rewrite workflow from both `.claude/` and `.codex/`.
+If you do not have an associated implementation:
+
+- Plugin mode (recommended): set `implementation.enabled` to `false` in `.scientific-writing.json`, rerun `setup_paper_project.py`, and skip implementation-only workflows in usage.
+- Manual non-plugin mode: if you do not rerun the plugin bootstrap, you may delete implementation-checker and technical rewrite files from `.claude/` and `.codex/` if you want a smaller local setup.
 
 ---
 
@@ -110,6 +166,10 @@ Open `.claude/skills/paper-build/SKILL.md` and follow the `CUSTOMIZE` instructio
 
 Mirror the same project-specific build behavior in `.codex/skills/paper-build/SKILL.md`.
 
+Plugin-safe note:
+- In plugin-first mode, edit `plugins/scientific-writing/assets/templates/root/.claude/skills/paper-build/SKILL.md.tmpl` and `plugins/scientific-writing/assets/templates/root/.codex/skills/paper-build/SKILL.md.tmpl`, then rerun bootstrap.
+- Direct edits in generated `.../paper-build/SKILL.md` files are manual/non-plugin mode unless you accept overwrite on rerun.
+
 ---
 
 ## 7. Add project macros to the writer skills
@@ -123,6 +183,10 @@ In each of the three writing skills below, find the `<!-- CUSTOMIZE: List your p
 - [ ] `.claude/skills/technical-paragraph-rewrite/SKILL.md` (Phase 3)
 - [ ] `.codex/skills/technical-paragraph-rewrite/SKILL.md` (Phase 3)
 
+Plugin-safe note:
+- In plugin-first mode, apply these macro-list changes to the matching templates under `plugins/scientific-writing/assets/templates/root/.claude/skills/` and `plugins/scientific-writing/assets/templates/root/.codex/skills/`, then rerun bootstrap.
+- Direct edits in generated skill files are manual/non-plugin mode unless you accept overwrite on rerun.
+
 ---
 
 ## 8. Add author annotation commands (OPTIONAL)
@@ -134,6 +198,10 @@ If your project uses per-author annotation macros (e.g. `\alice{...}`, `\bob{...
 - [ ] Add them to `.claude/skills/find-annotations/SKILL.md` (grep command and output format)
 - [ ] Add them to `.codex/skills/find-annotations/SKILL.md`
 
+Plugin-safe note:
+- In plugin-first mode, update the matching `find-annotations` templates under `plugins/scientific-writing/assets/templates/root/...`, then rerun bootstrap.
+- Direct edits in generated `find-annotations` skill files are manual/non-plugin mode unless you accept overwrite on rerun.
+
 ---
 
 ## 9. Configure sync-remote (OPTIONAL)
@@ -142,6 +210,10 @@ If you sync with a remote (Overleaf, GitHub, etc.):
 
 - [ ] Open `.claude/skills/sync-remote/SKILL.md` and adjust the `git add` glob patterns to match your project's source layout (figures directory name, etc.).
 - [ ] Open `.codex/skills/sync-remote/SKILL.md` and adjust the same staging rules.
+
+Plugin-safe note:
+- In plugin-first mode, edit the matching `sync-remote` templates under `plugins/scientific-writing/assets/templates/root/...`, then rerun bootstrap.
+- Direct edits in generated `sync-remote` skill files are manual/non-plugin mode unless you accept overwrite on rerun.
 
 ---
 
@@ -172,8 +244,8 @@ After completing setup, you should have:
 | `.codex/context/manuscript-context.md` | Stable manuscript context recorded |
 | `.codex/agents/*.md` | Optional implementation placeholders filled in |
 | `paper-build/SKILL.md` | Project root, output path, build/lint commands filled in |
-| `paper-implementation-checker.md` | Paths filled in (or file deleted) |
-| `technical-paragraph-rewrite/SKILL.md` | Paths filled in (or file deleted) |
+| `paper-implementation-checker.md` | Plugin mode: set `implementation.enabled=false` to skip/remove managed checker outputs on rerun; Manual non-plugin mode: optional file deletion if you will not rerun bootstrap |
+| `technical-paragraph-rewrite/SKILL.md` | Plugin mode: keep managed file and skip implementation-only usage when `implementation.enabled=false`; Manual non-plugin mode: optional file deletion if you will not rerun bootstrap |
 | `address-reviewer-comment/SKILL.md` | Phase 0 table filled in |
 | `write-to-intent/SKILL.md` | Phase 1a table filled in |
 | `find-annotations/SKILL.md` | Author commands added (if applicable) |

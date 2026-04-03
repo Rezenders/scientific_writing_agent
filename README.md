@@ -1,6 +1,6 @@
 # scientific-writing-agent
 
-A Claude Code and Codex configuration template for writing scientific papers in LaTeX. Drop it into any paper repository and get a multi-agent writing assistant that reviews, rewrites, and audits your manuscript — all without touching a file until you approve.
+A Claude Code and Codex configuration template for writing scientific papers in LaTeX. Drop it into any paper repository and get a multi-agent writing assistant that reviews, rewrites, and audits your manuscript. In proposal-first rewrite/edit workflows, it works without touching a file until you approve.
 
 ---
 
@@ -35,6 +35,23 @@ A Claude Code and Codex configuration template for writing scientific papers in 
 In Claude Code, each skill is a slash command you type directly.
 
 In Codex, the same workflows live as repo-local skill specs under `.codex/skills/<skill>/SKILL.md`.
+
+## Codex Plugin
+
+This repository includes a repo-local plugin at `plugins/scientific-writing/`.
+It is also registered in the repo-local marketplace at `.agents/plugins/marketplace.json` so Codex can discover it without manual path lookup.
+
+- Setup workflow skill: `setup-paper-project`
+- Script entrypoint: `plugins/scientific-writing/scripts/setup_paper_project.py`
+- Repo config source of truth: `.scientific-writing.json`
+
+Use this command to bootstrap or refresh the managed setup files for the current repo:
+
+```bash
+python3 plugins/scientific-writing/scripts/setup_paper_project.py --repo-root .
+```
+
+See `docs/plugin-setup.md` for ownership boundaries and rerun behavior.
 
 Most skills need a few pieces of information upfront — provide them in the same message to avoid extra back-and-forth.
 
@@ -253,7 +270,7 @@ user states goal
             → user approves → file edited
 ```
 
-No file is ever modified without your explicit approval.
+In proposal-first rewrite/edit workflows, no file is modified without your explicit approval.
 
 ---
 
@@ -261,7 +278,8 @@ No file is ever modified without your explicit approval.
 
 See **[SETUP.md](SETUP.md)** for the full step-by-step checklist. The short version:
 
-1. Copy `.claude/`, `.codex/`, `CLAUDE.md`, and `AGENTS.md` into your paper repo.
+1. Copy `.claude/`, `.codex/`, `CLAUDE.md`, and `AGENTS.md` into your paper repo. If you plan to use the plugin bootstrap path, also copy `plugins/scientific-writing/`.
+   In plugin-first mode, treat later setup edits as config/template work (`.scientific-writing.json` and `plugins/scientific-writing/assets/templates/root/`) to avoid losing changes on rerun.
 2. Fill in all `<!-- CUSTOMIZE -->` sections in `CLAUDE.md`, `AGENTS.md`, and `.codex/context/manuscript-context.md`.
 3. Replace any placeholder implementation paths in the optional checker and rewrite workflows if your paper describes a codebase.
 4. If you want Claude's persistent memory, create the `.claude/agent-memory/*/` directories as described in `SETUP.md`.

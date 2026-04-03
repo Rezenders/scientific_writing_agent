@@ -1,0 +1,33 @@
+{
+  "name": "scientific-writing",
+  "version": "0.1.0",
+  "description": "Repo-local scientific writing setup and workflow support for Codex.",
+  "author": {
+    "name": "Gustavo"
+  },
+  "license": "MIT",
+  "keywords": [
+    "scientific-writing",
+    "latex",
+    "codex",
+    "research-paper"
+  ],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Scientific Writing",
+    "shortDescription": "Set up and maintain scientific paper agent config.",
+    "longDescription": "Bootstraps and refreshes repo-local scientific writing configuration for Codex and Claude.",
+    "developerName": "Gustavo",
+    "category": "Productivity",
+    "capabilities": [
+      "Interactive",
+      "Write"
+    ],
+    "defaultPrompt": [
+      "Set up this repo for a new scientific paper.",
+      "Refresh the scientific writing config from the repo config.",
+      "Review what this paper config is missing."
+    ],
+    "brandColor": "#2563EB"
+  }
+}

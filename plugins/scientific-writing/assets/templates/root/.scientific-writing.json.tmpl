@@ -1,0 +1,64 @@
+{
+  "paper": {
+    "title": "Paper Title",
+    "topic": "Paper topic",
+    "format": "journal or conference format",
+    "research_questions": [
+      "Research question 1",
+      "Research question 2"
+    ],
+    "entrypoint": "main.tex",
+    "sections": [
+      "introduction.tex",
+      "background.tex",
+      "method.tex",
+      "evaluation.tex",
+      "conclusion.tex"
+    ],
+    "support_files": [
+      "macros.tex",
+      "references.bib"
+    ]
+  },
+  "build": {
+    "pdf_command": "make pdf",
+    "lint_command": "make lint",
+    "output_pdf": "build/paper.pdf"
+  },
+  "annotations": {
+    "commands": [
+      {
+        "command": "\\todo{text}",
+        "color": "blue",
+        "purpose": "Open task / reminder"
+      },
+      {
+        "command": "\\revise{text}",
+        "color": "purple",
+        "purpose": "Content needing revision"
+      },
+      {
+        "command": "\\red{text}",
+        "color": "red",
+        "purpose": "Highlighted warnings"
+      }
+    ]
+  },
+  "macros": {
+    "key_macros": [
+      "\\approachname"
+    ]
+  },
+  "terminology": {
+    "rules": []
+  },
+  "implementation": {
+    "enabled": false,
+    "paths": {
+      "types": "",
+      "examples": "",
+      "runtime": "",
+      "design_docs": ""
+    }
+  }
+}
