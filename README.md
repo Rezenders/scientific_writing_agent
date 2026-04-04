@@ -45,6 +45,9 @@ A Claude Code and Codex configuration template for writing scientific papers in 
 | `/pre-submission` | Full go/no-go checklist: build, lint, annotations, consistency audit, and (optionally) implementation alignment. |
 | `/full-manuscript-audit` | Multi-phase audit of every section: annotations → consistency → per-section review → implementation spot-check → unified GO/NO-GO report. Run before `/pre-submission`. |
 | `/sync-remote` | Safe git sync workflow — enforces pull-before-push and never stages build artifacts. Works with Overleaf, GitHub, or any remote. |
+| `/bootstrap-memory` | Pre-populates all agent memory files from `CLAUDE.md` and the manuscript. Run once after setup to give agents immediate project context. |
+| `/response-to-reviewers` | Full resubmission workflow: parses all reviewer comments, drafts a formal response letter with per-comment responses, and proposes manuscript edits. Nothing is written to file without your approval. |
+| `/diff-review` | Targeted review of only what changed in a git diff — consistency and scientific review scoped to the modified hunks. Much faster than `/section-review` for incremental edits. |
 
 ---
 
@@ -319,6 +322,77 @@ Commit message: Edit: approach — tighten contribution framing
 ```
 
 The skill stages only allowed source file types (`.tex`, `.bib`, figures), reviews what is staged before committing, and stops if conflicts are detected.
+
+---
+
+### `/bootstrap-memory`
+
+Pre-populates all agent memory files from `CLAUDE.md` and the manuscript. Run this once after `/setup-paper-project` to give agents immediate project-specific context rather than building it up slowly over sessions.
+
+```
+/bootstrap-memory
+```
+
+No required arguments. The skill reads `CLAUDE.md` (and `AGENTS.md` if present) and scans the manuscript to extract macros, terminology rules, acronyms, contribution claims, and style rules, then writes them into all four agent memory directories.
+
+Optional arguments if your layout differs from the defaults:
+```
+/bootstrap-memory
+
+Memory root: .claude/agent-memory/
+Manuscript root: sections/
+Scope: full
+```
+
+Reports what was written, how many facts were extracted, and any `<!-- CUSTOMIZE -->` placeholders still unfilled.
+
+---
+
+### `/response-to-reviewers`
+
+Full resubmission workflow. Handles all reviewer comments in a single structured session, producing a formal response letter and manuscript edit proposals. **Nothing is written to file until you explicitly approve.**
+
+```
+/response-to-reviewers
+
+Mode: full
+
+Decision: Major revision. The paper requires clearer motivation and stronger experimental validation.
+
+Reviewer 1:
+The paper presents an interesting approach, but the motivation in Section 1
+is unclear. Also, the claim on line 87 that the method runs in O(n) is
+not adequately justified...
+
+Reviewer 2:
+I found the experimental setup well-described. However, the paper lacks
+a comparison with baseline Y, which is standard in this area...
+```
+
+The skill parses comments into a numbered inventory (R1.1, R1.2, R2.1…), shows it to you for confirmation, then drafts responses and proposes manuscript edits. You review and approve each edit before any file is modified.
+
+Use `Mode: draft-only` to produce the response letter only, without manuscript edit proposals.
+
+---
+
+### `/diff-review`
+
+Reviews only what changed in a git diff — scoped to the modified hunks, not the entire section. Much faster than `/section-review` for incremental edits.
+
+```
+/diff-review
+```
+
+By default, Claude runs `git diff` automatically. Options:
+- **Staged only**: say "staged" — Claude runs `git diff --cached`
+- **Specific range**: provide a commit ref (e.g. `HEAD~1`, `abc123..HEAD`)
+- **Manual**: paste the diff directly if not in a git repo
+
+```
+/diff-review HEAD~2..HEAD
+```
+
+Produces a targeted report with consistency and scientific findings scoped only to the changed passages, plus a CLEAN / MINOR ISSUES / NEEDS ATTENTION verdict.
 
 ---
 
