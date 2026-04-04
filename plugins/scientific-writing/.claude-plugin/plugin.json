@@ -1,0 +1,21 @@
+{
+  "name": "scientific-writing",
+  "version": "0.1.0",
+  "description": "Multi-agent scientific paper writing assistant for LaTeX manuscripts. Provides agents and skills for reviewing, rewriting, consistency checking, and pre-submission auditing. Includes a setup skill that bootstraps agent configuration into any paper repository.",
+  "author": {
+    "name": "Gustavo Rezende",
+    "url": "https://github.com/Rezenders"
+  },
+  "homepage": "https://github.com/Rezenders/scientific_writing_agent",
+  "repository": "https://github.com/Rezenders/scientific_writing_agent",
+  "license": "Apache-2.0",
+  "keywords": [
+    "scientific-writing",
+    "latex",
+    "research-paper",
+    "agents",
+    "skills",
+    "manuscript"
+  ],
+  "skills": "./skills/"
+}

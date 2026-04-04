@@ -4,6 +4,23 @@ A Claude Code and Codex configuration template for writing scientific papers in 
 
 ---
 
+## Navigation
+
+| I want to… | Go to |
+|---|---|
+| Understand what's included | [What's included](#whats-included) |
+| See all agents at a glance | [Agents](#agents) |
+| See all skills at a glance | [Skills](#skills) |
+| Learn how to use a skill | [Using the skills](#using-the-skills) |
+| Install via plugin marketplace | [Installation](#installation) |
+| Set up on a new paper repo | [Setup](#setup) / [SETUP.md](SETUP.md) |
+| Use the Codex plugin | [Codex Plugin](#codex-plugin) |
+| Understand the agent pipelines | [How it works](#how-it-works) |
+| Customize for my project | [Adapting to your project](#adapting-to-your-project) |
+| Enable agent memory | [Agent memory](#agent-memory) |
+
+---
+
 ## What's included
 
 ### Agents
@@ -26,6 +43,7 @@ A Claude Code and Codex configuration template for writing scientific papers in 
 | `/paper-build` | Builds the PDF and runs chktex lint. Reports LaTeX errors, warnings, undefined references, and missing citations. Run after any substantive edit. |
 | `/find-annotations` | Scans all `.tex` files for `\todo`, `\revise`, `\red`, and author comments. Run before any writing session or submission. |
 | `/pre-submission` | Full go/no-go checklist: build, lint, annotations, consistency audit, and (optionally) implementation alignment. |
+| `/full-manuscript-audit` | Multi-phase audit of every section: annotations → consistency → per-section review → implementation spot-check → unified GO/NO-GO report. Run before `/pre-submission`. |
 | `/sync-remote` | Safe git sync workflow — enforces pull-before-push and never stages build artifacts. Works with Overleaf, GitHub, or any remote. |
 
 ---
@@ -231,6 +249,55 @@ Blocking issues:
 
 ---
 
+### `/full-manuscript-audit`
+
+Runs a structured 5-phase audit across the entire manuscript and produces a unified GO / CONDITIONAL GO / NO-GO report. Use this before `/pre-submission` to catch issues early.
+
+```
+/full-manuscript-audit
+```
+
+No required arguments. Optional focus hint:
+
+```
+/full-manuscript-audit
+
+Focus: pay extra attention to evaluation claims and
+       all comparisons with the baseline approach.
+```
+
+The skill runs in order:
+1. **Annotation inventory** — all open `\todo`, `\revise`, and author comments
+2. **Consistency audit** — terminology drift, acronym consistency, contribution-statement alignment
+3. **Section-by-section scientific review** — clarity, redundancy, claim precision, flow, alignment
+4. **Implementation spot-check** *(skipped if not configured)* — highest-risk claims vs. codebase
+5. **Unified report** — merged findings, per-section verdicts, recommended fix order
+
+Example output:
+
+```
+## Full Manuscript Audit
+
+### Open Annotations
+4 open across 3 files (introduction.tex × 2, evaluation.tex × 2)
+
+### Critical Issues
+1. [Contribution drift] Introduction promises X but Section 4 demonstrates Y only
+   ...
+
+### Per-Section Verdicts
+| Section      | Verdict          |
+|---|---|
+| Introduction | NEEDS REVISION   |
+| Method       | READY            |
+| Evaluation   | NEEDS REVISION   |
+| ...          | ...              |
+
+### Overall Verdict: CONDITIONAL GO
+```
+
+---
+
 ### `/sync-remote`
 
 Safe git sync with a remote (Overleaf, GitHub, or any other). Always pulls before pushing, never stages build artifacts.
@@ -271,6 +338,46 @@ user states goal
 ```
 
 In proposal-first rewrite/edit workflows, no file is modified without your explicit approval.
+
+---
+
+## Installation
+
+### Via Claude Code plugin marketplace
+
+Add this repository to your Claude Code marketplace once, then install the plugin into any paper project:
+
+```bash
+/plugin marketplace add https://github.com/Rezenders/scientific_writing_agent.git
+```
+
+Then from inside your paper repository:
+
+```bash
+/plugin install scientific-writing@scientific-writing-agent
+```
+
+Once installed, run the setup skill to bootstrap agent configuration into your project:
+
+```
+/setup-paper-project
+```
+
+This copies all agent definitions, skills, and policy files into your repo, ready to customize.
+
+### Manual installation
+
+If you prefer not to use the plugin system, copy the relevant directories directly into your paper repo:
+
+```bash
+# From the scientific_writing_agent root:
+cp -r .claude/  your-paper-repo/.claude/
+cp -r .codex/   your-paper-repo/.codex/
+cp CLAUDE.md    your-paper-repo/CLAUDE.md
+cp AGENTS.md    your-paper-repo/AGENTS.md
+```
+
+Then follow [SETUP.md](SETUP.md) to fill in the project-specific placeholders.
 
 ---
 

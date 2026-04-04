@@ -1,0 +1,33 @@
+{
+  "name": "scientific-writing-agent",
+  "owner": {
+    "name": "Gustavo Rezende",
+    "url": "https://github.com/Rezenders"
+  },
+  "metadata": {
+    "description": "Claude Code and Codex configuration template for scientific paper writing in LaTeX",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "scientific-writing",
+      "source": "./plugins/scientific-writing",
+      "description": "Multi-agent scientific paper writing assistant. Provides agents and skills for reviewing, rewriting, consistency checking, and pre-submission auditing of LaTeX manuscripts.",
+      "version": "0.1.0",
+      "author": {
+        "name": "Gustavo Rezende"
+      },
+      "keywords": [
+        "scientific-writing",
+        "latex",
+        "research-paper",
+        "agents",
+        "skills",
+        "manuscript"
+      ],
+      "category": "productivity",
+      "license": "Apache-2.0",
+      "strict": false
+    }
+  ]
+}
