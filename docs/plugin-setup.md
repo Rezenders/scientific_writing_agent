@@ -1,5 +1,14 @@
 # Plugin Setup
 
+For existing paper repositories, the simpler and safer path is the conservative installer:
+
+```bash
+python3 /path/to/scientific_writing_agent/scripts/scientific_writing_agent.py install --repo-root .
+python3 /path/to/scientific_writing_agent/scripts/scientific_writing_agent.py doctor --repo-root .
+```
+
+Use the plugin setup script below when you specifically want `.scientific-writing.json`-driven generated outputs.
+
 ## What the plugin manages
 
 The repo-local plugin at `plugins/scientific-writing/` provides the `setup-paper-project` workflow.

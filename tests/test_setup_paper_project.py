@@ -48,11 +48,11 @@ class SetupPaperProjectTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             template_root = root / "templates"
-            (template_root / ".codex" / "agents").mkdir(parents=True)
+            (template_root / ".agents" / "agents").mkdir(parents=True)
             (template_root / "AGENTS.md.tmpl").write_text(
                 "Title: {{ paper.title }}", encoding="utf-8"
             )
-            (template_root / ".codex" / "agents" / "paper-implementation-checker.md.tmpl").write_text(
+            (template_root / ".agents" / "agents" / "paper-implementation-checker.md.tmpl").write_text(
                 "Types: {{ implementation.paths.types }}", encoding="utf-8"
             )
 
@@ -66,7 +66,8 @@ class SetupPaperProjectTests(unittest.TestCase):
             written = module.write_outputs(root, template_root, cfg)
 
             self.assertEqual((root / "AGENTS.md").read_text(encoding="utf-8"), "Title: My Paper")
-            self.assertFalse((root / ".codex" / "agents" / "paper-implementation-checker.md").exists())
+            self.assertFalse((root / ".agents" / "agents" / "paper-implementation-checker.md").exists())
+            self.assertTrue((root / ".codex" / "agents").is_symlink())
             self.assertIn(root / "AGENTS.md", written)
 
     def test_ensure_config_creates_file_from_template_if_missing(self):
@@ -163,8 +164,8 @@ class SetupPaperProjectTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as tmp:
             root = Path(tmp)
             template_root = root / "templates"
-            (template_root / ".codex" / "agents").mkdir(parents=True)
-            (template_root / ".codex" / "agents" / "paper-implementation-checker.md.tmpl").write_text(
+            (template_root / ".agents" / "agents").mkdir(parents=True)
+            (template_root / ".agents" / "agents" / "paper-implementation-checker.md.tmpl").write_text(
                 "Types: {{ implementation.paths.types }}",
                 encoding="utf-8",
             )
@@ -185,7 +186,7 @@ class SetupPaperProjectTests(unittest.TestCase):
             }
 
             module.write_outputs(root, template_root, enabled_cfg)
-            checker_path = root / ".codex" / "agents" / "paper-implementation-checker.md"
+            checker_path = root / ".agents" / "agents" / "paper-implementation-checker.md"
             self.assertTrue(checker_path.exists())
 
             module.write_outputs(root, template_root, disabled_cfg)

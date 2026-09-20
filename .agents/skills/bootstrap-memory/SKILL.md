@@ -1,11 +1,13 @@
 ---
 name: bootstrap-memory
-description: Use at the start of a new paper project to pre-populate all agent memory files from CLAUDE.md/AGENTS.md and the manuscript. Run once after setup.
+description: Use after bootstrap-project-context to pre-populate optional agent memory files from AGENTS.md, CLAUDE.md, `.agents/context/`, and the manuscript.
 ---
 
 # Bootstrap Memory
 
-Scans project policy files and the manuscript to pre-populate all agent memory files with project-specific knowledge.
+Scans project policy files, `.agents/context/`, and the manuscript to pre-populate optional agent memory files with project-specific knowledge.
+
+This is not the initial questionnaire or context-filling workflow. Use `bootstrap-project-context` first when `.agents/context/` still contains generic placeholders.
 
 ## Project Layout
 

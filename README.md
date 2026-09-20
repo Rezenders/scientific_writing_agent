@@ -45,7 +45,8 @@ A Claude Code and Codex configuration template for writing scientific papers in 
 | `/pre-submission` | Full go/no-go checklist: build, lint, annotations, consistency audit, and (optionally) implementation alignment. |
 | `/full-manuscript-audit` | Multi-phase audit of every section: annotations → consistency → per-section review → implementation spot-check → unified GO/NO-GO report. Run before `/pre-submission`. |
 | `/sync-remote` | Safe git sync workflow — enforces pull-before-push and never stages build artifacts. Works with Overleaf, GitHub, or any remote. |
-| `/bootstrap-memory` | Pre-populates all agent memory files from `CLAUDE.md` and the manuscript. Run once after setup to give agents immediate project context. |
+| `/bootstrap-project-context` | Interviews the user and inspects the repository to fill `.agents/context/` templates after installation. |
+| `/bootstrap-memory` | Optionally pre-populates agent memory files from populated context files, policies, and the manuscript. |
 | `/response-to-reviewers` | Full resubmission workflow: parses all reviewer comments, drafts a formal response letter with per-comment responses, and proposes manuscript edits. Nothing is written to file without your approval. |
 | `/diff-review` | Targeted review of only what changed in a git diff — consistency and scientific review scoped to the modified hunks. Much faster than `/section-review` for incremental edits. |
 
@@ -55,21 +56,28 @@ A Claude Code and Codex configuration template for writing scientific papers in 
 
 In Claude Code, each skill is a slash command you type directly.
 
-In Codex, the same workflows live as repo-local skill specs under `.codex/skills/<skill>/SKILL.md`.
+The canonical workflow files live under `.agents/`. Harness-specific directories such as `.claude/` and `.codex/` should be thin symlinks or generated adapters to `.agents/`, not independent workflow copies.
 
 ## Codex Plugin
 
 This repository includes a repo-local plugin at `plugins/scientific-writing/`.
 It is also registered in the repo-local marketplace at `.agents/plugins/marketplace.json` so Codex can discover it without manual path lookup.
 
-- Setup workflow skill: `setup-paper-project`
-- Script entrypoint: `plugins/scientific-writing/scripts/setup_paper_project.py`
-- Repo config source of truth: `.scientific-writing.json`
+- Conservative installer: `scripts/scientific_writing_agent.py`
+- Plugin bootstrap script: `plugins/scientific-writing/scripts/setup_paper_project.py`
+- Canonical workflow source: `.agents/`
+- Optional plugin config: `.scientific-writing.json`
 
-Use this command to bootstrap or refresh the managed setup files for the current repo:
+Recommended install into an existing paper repo:
 
 ```bash
-python3 plugins/scientific-writing/scripts/setup_paper_project.py --repo-root .
+python3 /path/to/scientific_writing_agent/scripts/scientific_writing_agent.py install --repo-root .
+```
+
+Then validate:
+
+```bash
+python3 /path/to/scientific_writing_agent/scripts/scientific_writing_agent.py doctor --repo-root .
 ```
 
 See `docs/plugin-setup.md` for ownership boundaries and rerun behavior.
@@ -441,17 +449,31 @@ This copies all agent definitions, skills, and policy files into your repo, read
 
 ### Manual installation
 
-If you prefer not to use the plugin system, copy the relevant directories directly into your paper repo:
+For an existing paper project, use the conservative installer rather than copying harness directories by hand:
 
 ```bash
-# From the scientific_writing_agent root:
-cp -r .claude/  your-paper-repo/.claude/
-cp -r .codex/   your-paper-repo/.codex/
-cp CLAUDE.md    your-paper-repo/CLAUDE.md
-cp AGENTS.md    your-paper-repo/AGENTS.md
+# From anywhere:
+python3 /path/to/scientific_writing_agent/scripts/scientific_writing_agent.py install \
+  --repo-root /path/to/your-paper-repo \
+  --mode symlink
 ```
 
-Then follow [SETUP.md](SETUP.md) to fill in the project-specific placeholders.
+This installs `.agents/`, creates Claude/Codex adapter symlinks when safe, appends a short policy block to `AGENTS.md` and `CLAUDE.md`, and preserves project-specific context files by default.
+
+Useful variants:
+
+```bash
+# Copy reusable files instead of symlinking to this repository
+python3 /path/to/scientific_writing_agent/scripts/scientific_writing_agent.py install --repo-root . --mode copy
+
+# Refresh reusable agents/skills later without overwriting project context
+python3 /path/to/scientific_writing_agent/scripts/scientific_writing_agent.py update --repo-root .
+
+# Check symlinks, skill frontmatter, and policy references
+python3 /path/to/scientific_writing_agent/scripts/scientific_writing_agent.py doctor --repo-root .
+```
+
+Then follow [SETUP.md](SETUP.md) to fill in project-specific placeholders under `.agents/context/`.
 
 ---
 
@@ -459,11 +481,10 @@ Then follow [SETUP.md](SETUP.md) to fill in the project-specific placeholders.
 
 See **[SETUP.md](SETUP.md)** for the full step-by-step checklist. The short version:
 
-1. Copy `.claude/`, `.codex/`, `CLAUDE.md`, and `AGENTS.md` into your paper repo. If you plan to use the plugin bootstrap path, also copy `plugins/scientific-writing/`.
-   In plugin-first mode, treat later setup edits as config/template work (`.scientific-writing.json` and `plugins/scientific-writing/assets/templates/root/`) to avoid losing changes on rerun.
-2. Fill in all `<!-- CUSTOMIZE -->` sections in `CLAUDE.md`, `AGENTS.md`, and `.agents/context/manuscript-context.md`.
-3. Replace any placeholder implementation paths in the optional checker and rewrite workflows if your paper describes a codebase.
-4. If you want Claude's persistent memory, create the `.claude/agent-memory/*/` directories as described in `SETUP.md`.
+1. Run `scripts/scientific_writing_agent.py install --repo-root /path/to/your-paper-repo`.
+2. Run `scripts/scientific_writing_agent.py doctor --repo-root /path/to/your-paper-repo`.
+3. Fill in placeholders in `.agents/context/manuscript-context.md`, `paper-model.md`, `terminology.md`, `contributions.md`, and `evaluation-claims.md`.
+4. Replace any placeholder implementation paths in `.agents/context/paper-model.md` if your paper describes a codebase.
 
 ---
 
