@@ -461,7 +461,7 @@ See **[SETUP.md](SETUP.md)** for the full step-by-step checklist. The short vers
 
 1. Copy `.claude/`, `.codex/`, `CLAUDE.md`, and `AGENTS.md` into your paper repo. If you plan to use the plugin bootstrap path, also copy `plugins/scientific-writing/`.
    In plugin-first mode, treat later setup edits as config/template work (`.scientific-writing.json` and `plugins/scientific-writing/assets/templates/root/`) to avoid losing changes on rerun.
-2. Fill in all `<!-- CUSTOMIZE -->` sections in `CLAUDE.md`, `AGENTS.md`, and `.codex/context/manuscript-context.md`.
+2. Fill in all `<!-- CUSTOMIZE -->` sections in `CLAUDE.md`, `AGENTS.md`, and `.agents/context/manuscript-context.md`.
 3. Replace any placeholder implementation paths in the optional checker and rewrite workflows if your paper describes a codebase.
 4. If you want Claude's persistent memory, create the `.claude/agent-memory/*/` directories as described in `SETUP.md`.
 
@@ -482,7 +482,7 @@ Each agent maintains a persistent memory system in `.claude/agent-memory/<agent>
 
 Memory is version-controlled alongside the manuscript, so it persists across machines and collaborators.
 
-For Codex, the analogous durable context is kept repo-local in `.codex/context/manuscript-context.md` rather than per-agent memory directories.
+For Codex, the analogous durable context is kept repo-local in `.agents/context/manuscript-context.md` rather than per-agent memory directories.
 
 ---
 
@@ -492,7 +492,7 @@ The template is designed to be generic. Things you will always customize:
 
 - **CLAUDE.md**: paper title, research questions, document structure, build commands, annotation macros, LaTeX macros.
 - **AGENTS.md**: the same manuscript-specific rules for Codex.
-- **`.codex/context/manuscript-context.md`**: stable terminology, notation, and known risks you want Codex to preserve.
+- **`.agents/context/manuscript-context.md`**: stable terminology, notation, and known risks you want Codex to preserve.
 - **Claude agent memory paths**: one `<YOUR_PROJECT_ROOT>` per Claude agent file if you use Claude memory.
 
 Things you customize only if your paper has an associated codebase:

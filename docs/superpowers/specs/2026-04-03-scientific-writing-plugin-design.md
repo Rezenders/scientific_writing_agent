@@ -107,10 +107,10 @@ The plugin should own template copies of:
 - `AGENTS.md`
 - `.codex/agents/*`
 - `.codex/skills/*`
-- `.codex/context/manuscript-context.md`
+- `.agents/context/manuscript-context.md`
 - `CLAUDE.md`
 - `.claude/agents/*`
-- `.claude/skills/*`
+- `.agents/skills/*`
 
 These should live under the plugin template directory, not be generated inline inside Python string literals.
 
@@ -185,9 +185,9 @@ This is more reliable than partial in-file patching for template-heavy prompt fi
 - `CLAUDE.md`
 - `.codex/agents/*`
 - `.codex/skills/*`
-- `.codex/context/manuscript-context.md`
+- `.agents/context/manuscript-context.md`
 - `.claude/agents/*`
-- `.claude/skills/*`
+- `.agents/skills/*`
 
 ### User-Owned
 

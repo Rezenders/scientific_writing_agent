@@ -135,9 +135,57 @@ def should_skip_output(output_rel: Path, config: dict[str, Any]) -> bool:
     implementation = config.get("implementation", {})
     if not isinstance(implementation, dict):
         raise ValueError("implementation must be an object")
+
+    output_posix = output_rel.as_posix()
+    adapter_prefixes = (
+        ".claude/agents/",
+        ".claude/skills/",
+        ".codex/agents/",
+        ".codex/skills/",
+        ".codex/context/",
+    )
+    if output_posix.startswith(adapter_prefixes):
+        return True
+
     if implementation.get("enabled", False):
         return False
-    return "paper-implementation-checker" in output_rel.as_posix()
+    return "paper-implementation-checker" in output_posix
+
+
+def ensure_symlink(path: Path, target: str) -> None:
+    if path.is_symlink():
+        if path.readlink().as_posix() == target:
+            return
+        path.unlink()
+    elif path.exists():
+        if path.is_dir():
+            for child in path.rglob("*"):
+                if child.is_file() or child.is_symlink():
+                    child.unlink()
+            for child in sorted(path.rglob("*"), reverse=True):
+                if child.is_dir():
+                    child.rmdir()
+            path.rmdir()
+        else:
+            path.unlink()
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.symlink_to(target)
+
+
+def write_adapter_symlinks(repo_root: Path) -> list[Path]:
+    links = {
+        Path(".claude/agents"): "../.agents/agents",
+        Path(".claude/skills"): "../.agents/skills",
+        Path(".codex/agents"): "../.agents/agents",
+        Path(".codex/skills"): "../.agents/skills",
+        Path(".codex/context"): "../.agents/context",
+    }
+    written: list[Path] = []
+    for rel, target in links.items():
+        path = repo_root / rel
+        ensure_symlink(path, target)
+        written.append(path)
+    return written
 
 
 def write_outputs(repo_root: Path, template_root: Path, config: dict[str, Any]) -> list[Path]:
@@ -161,6 +209,7 @@ def write_outputs(repo_root: Path, template_root: Path, config: dict[str, Any]) 
         rendered = render_text(template_path.read_text(encoding="utf-8"), config)
         output_path.write_text(rendered, encoding="utf-8")
         written.append(output_path)
+    written.extend(write_adapter_symlinks(repo_root))
     return written
 
 

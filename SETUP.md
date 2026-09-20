@@ -123,7 +123,7 @@ Open `AGENTS.md` and fill in the same manuscript-specific information you added 
 - [ ] Project-specific terminology rules
 - [ ] Implementation reference paths (if applicable)
 
-Then open `.codex/context/manuscript-context.md` and record any durable manuscript context that should remain stable across Codex sessions:
+Then open `.agents/context/manuscript-context.md` and record any durable manuscript context that should remain stable across Codex sessions:
 
 - [ ] Canonical system, method, dataset, and macro names
 - [ ] Preferred terminology and important distinctions
@@ -140,11 +140,11 @@ Only needed if your paper describes a software implementation:
 
 - [ ] Open `.claude/agents/paper-implementation-checker.md` and replace all `<PATH_TO_...>` placeholders with your actual file paths.
 - [ ] Open `.codex/agents/paper-implementation-checker.md` and replace all `<PATH_TO_...>` placeholders with your actual file paths.
-- [ ] Open `.claude/skills/technical-paragraph-rewrite/SKILL.md` and update the Implementation Reference Paths table.
+- [ ] Open `.agents/skills/technical-paragraph-rewrite/SKILL.md` and update the Implementation Reference Paths table.
 - [ ] Open `.codex/skills/technical-paragraph-rewrite/SKILL.md` and update the Implementation Reference Paths table.
-- [ ] Open `.claude/skills/address-reviewer-comment/SKILL.md` and update the Phase 0 table.
+- [ ] Open `.agents/skills/address-reviewer-comment/SKILL.md` and update the Phase 0 table.
 - [ ] Open `.codex/skills/address-reviewer-comment/SKILL.md` and update the Phase 0 table.
-- [ ] Open `.claude/skills/write-to-intent/SKILL.md` and update the Phase 1a table.
+- [ ] Open `.agents/skills/write-to-intent/SKILL.md` and update the Phase 1a table.
 - [ ] Open `.codex/skills/write-to-intent/SKILL.md` and update the Phase 1a table.
 
 If you do not have an associated implementation:
@@ -156,7 +156,7 @@ If you do not have an associated implementation:
 
 ## 6. Customize the paper-build skill
 
-Open `.claude/skills/paper-build/SKILL.md` and follow the `CUSTOMIZE` instructions at the top:
+Open `.agents/skills/paper-build/SKILL.md` and follow the `CUSTOMIZE` instructions at the top:
 
 - [ ] Replace `<YOUR_PROJECT_ROOT>` with the absolute path to your manuscript repository
 - [ ] Replace `<YOUR_OUTPUT_PDF>` with the actual output path (e.g. `build/paper.pdf`)
@@ -167,7 +167,7 @@ Open `.claude/skills/paper-build/SKILL.md` and follow the `CUSTOMIZE` instructio
 Mirror the same project-specific build behavior in `.codex/skills/paper-build/SKILL.md`.
 
 Plugin-safe note:
-- In plugin-first mode, edit `plugins/scientific-writing/assets/templates/root/.claude/skills/paper-build/SKILL.md.tmpl` and `plugins/scientific-writing/assets/templates/root/.codex/skills/paper-build/SKILL.md.tmpl`, then rerun bootstrap.
+- In plugin-first mode, edit `plugins/scientific-writing/assets/templates/root/.agents/skills/paper-build/SKILL.md.tmpl` and `plugins/scientific-writing/assets/templates/root/.codex/skills/paper-build/SKILL.md.tmpl`, then rerun bootstrap.
 - Direct edits in generated `.../paper-build/SKILL.md` files are manual/non-plugin mode unless you accept overwrite on rerun.
 
 ---
@@ -176,15 +176,15 @@ Plugin-safe note:
 
 In each of the three writing skills below, find the `<!-- CUSTOMIZE: List your project-specific macros -->` comment and replace it with your actual macro list:
 
-- [ ] `.claude/skills/address-reviewer-comment/SKILL.md` (Phase 2)
+- [ ] `.agents/skills/address-reviewer-comment/SKILL.md` (Phase 2)
 - [ ] `.codex/skills/address-reviewer-comment/SKILL.md` (Phase 2)
-- [ ] `.claude/skills/write-to-intent/SKILL.md` (Phase 2)
+- [ ] `.agents/skills/write-to-intent/SKILL.md` (Phase 2)
 - [ ] `.codex/skills/write-to-intent/SKILL.md` (Phase 2)
-- [ ] `.claude/skills/technical-paragraph-rewrite/SKILL.md` (Phase 3)
+- [ ] `.agents/skills/technical-paragraph-rewrite/SKILL.md` (Phase 3)
 - [ ] `.codex/skills/technical-paragraph-rewrite/SKILL.md` (Phase 3)
 
 Plugin-safe note:
-- In plugin-first mode, apply these macro-list changes to the matching templates under `plugins/scientific-writing/assets/templates/root/.claude/skills/` and `plugins/scientific-writing/assets/templates/root/.codex/skills/`, then rerun bootstrap.
+- In plugin-first mode, apply these macro-list changes to the matching templates under `plugins/scientific-writing/assets/templates/root/.agents/skills/` and `plugins/scientific-writing/assets/templates/root/.codex/skills/`, then rerun bootstrap.
 - Direct edits in generated skill files are manual/non-plugin mode unless you accept overwrite on rerun.
 
 ---
@@ -195,7 +195,7 @@ If your project uses per-author annotation macros (e.g. `\alice{...}`, `\bob{...
 
 - [ ] Add them to the annotation table in `CLAUDE.md`
 - [ ] Add them to the annotation table in `AGENTS.md`
-- [ ] Add them to `.claude/skills/find-annotations/SKILL.md` (grep command and output format)
+- [ ] Add them to `.agents/skills/find-annotations/SKILL.md` (grep command and output format)
 - [ ] Add them to `.codex/skills/find-annotations/SKILL.md`
 
 Plugin-safe note:
@@ -208,7 +208,7 @@ Plugin-safe note:
 
 If you sync with a remote (Overleaf, GitHub, etc.):
 
-- [ ] Open `.claude/skills/sync-remote/SKILL.md` and adjust the `git add` glob patterns to match your project's source layout (figures directory name, etc.).
+- [ ] Open `.agents/skills/sync-remote/SKILL.md` and adjust the `git add` glob patterns to match your project's source layout (figures directory name, etc.).
 - [ ] Open `.codex/skills/sync-remote/SKILL.md` and adjust the same staging rules.
 
 Plugin-safe note:
@@ -241,7 +241,7 @@ After completing setup, you should have:
 | `.claude/agent-memory/*/` | Directories created |
 | `CLAUDE.md` | All CUSTOMIZE sections filled in |
 | `AGENTS.md` | Matching manuscript rules filled in for Codex |
-| `.codex/context/manuscript-context.md` | Stable manuscript context recorded |
+| `.agents/context/manuscript-context.md` | Stable manuscript context recorded |
 | `.codex/agents/*.md` | Optional implementation placeholders filled in |
 | `paper-build/SKILL.md` | Project root, output path, build/lint commands filled in |
 | `paper-implementation-checker.md` | Plugin mode: set `implementation.enabled=false` to skip/remove managed checker outputs on rerun; Manual non-plugin mode: optional file deletion if you will not rerun bootstrap |

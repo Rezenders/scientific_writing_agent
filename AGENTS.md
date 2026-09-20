@@ -1,243 +1,89 @@
 # AGENTS.md
 
-This file provides guidance to Codex when working with code in this repository.
+This file provides repository policy for Codex-style agents. The harness-independent workflow source is `.agents/`.
 
-<!-- ============================================================
-     TEMPLATE FILE — customize every section marked CUSTOMIZE
-     See SETUP.md for a step-by-step checklist.
-     ============================================================ -->
+## Canonical Workflow Layer
 
-## What This Is
+- `.agents/agents/` contains shared agent role instructions.
+- `.agents/skills/` contains shared manuscript workflows.
+- `.agents/context/` contains focused project context templates and project-specific guardrails.
+- `.claude/`, `.codex/`, and `.pi/` are adapters only. Keep harness-specific settings and plugin metadata there, but do not maintain divergent workflow copies.
 
-<!-- CUSTOMIZE: Replace with a description of your paper -->
-This repository contains the LaTeX source for "[Paper Title]". A research paper on [topic]. The paper targets [journal/conference format].
+When updating workflows, edit `.agents/` first. Use symlinks or generated mirrors for harnesses that require a specific directory layout.
 
-The goal is to produce a technically rigorous, internally consistent, publication-ready scientific manuscript. Edits must improve clarity, precision, coherence, and argument strength without changing the intended technical meaning.
+## What This Repository Is
 
-**Research questions** (anchor for consistency checks):
-<!-- CUSTOMIZE: Replace with your actual research questions -->
-- **RQ1:** [Your first research question]
-- **RQ2:** [Your second research question]
+This repository is a reusable scientific-writing agent template for LaTeX research papers. Downstream paper projects should replace placeholders such as `<PROJECT_NAME>`, `<MAIN_TEX>`, `<SECTION_FILE>`, `<KEY_MACRO>`, `<IMPLEMENTATION_REFERENCE>`, and `<EVALUATION_CLAIM>` with project-specific facts.
 
-## Writing Objectives
+The goal is to support technically rigorous, internally consistent, publication-ready scientific manuscripts. Edits must improve clarity, precision, coherence, and argument strength without changing intended technical meaning.
 
-Prioritize, in this order:
+## Editing Priorities
 
-1. Technical correctness
-2. Consistency with the rest of the manuscript
-3. Clarity and precision
-4. Concise academic style
-5. Grammar and fluency
+Apply these priorities in order:
 
-Do not make stylistic changes that weaken technical precision.
+1. technical correctness;
+2. consistency with the manuscript;
+3. clarity and precision;
+4. concise academic style;
+5. grammar and fluency.
+
+Do not optimize prose elegance at the expense of precision.
+
+## Human-Controlled Writing Workflow
+
+For substantive drafting or rewriting, preserve this workflow:
+
+1. establish an explicit passage contract using `.agents/context/passage-contract.md`;
+2. optionally create an argument plan for complex rhetorical work;
+3. produce one primary draft;
+4. run read-only diagnostic review when needed;
+5. ask the human to accept, reject, or modify findings;
+6. perform at most one targeted revision from accepted findings;
+7. run final diff, consistency, and build checks.
+
+Reviewer and critic agents diagnose only. They do not rewrite. Do not feed unapproved reviewer findings to the writer. Do not run automatic repeated critique/rewrite loops.
 
 ## Writing Style
 
 - Use formal scientific English.
 - Prefer precise terminology over stylistic variation.
 - Prefer direct, declarative sentences.
-- When introducing a tool or system, prefer "This work uses X" over "X serves as Y" — keep the authors as the active agent.
-- When introducing a contribution, prefer "This work proposes X to achieve Y" — make clear it is a contribution of this paper.
-- Avoid conversational wording, promotional tone, and vague intensifiers.
-- Avoid vague relative clauses that restate a role without adding information.
+- Prefer “This work proposes X to achieve Y” for contributions.
+- Prefer “This work uses X” over vague role-based phrasing.
+- Avoid conversational wording, promotional tone, vague intensifiers, and decorative flourish.
 - Avoid redundancy across adjacent sentences and paragraphs.
-- Avoid introducing new terminology when existing terminology already covers the concept.
-- Preserve the manuscript's established terminology unless there is a strong reason to change it.
-- Preserve the intended meaning of claims, definitions, assumptions, and results.
+- Preserve established manuscript terminology unless there is a strong reason to change it.
+- Preserve LaTeX macros, labels, references, citations, and equations unless a change is necessary and justified.
 
-## Terminology and Consistency
+## Focused Context Files
 
-Before changing terminology:
+Use `.agents/context/manuscript-context.md` as the compact index. Load only relevant focused files:
 
-- search the repository for the same term, acronym, and concept;
-- check whether the term is defined elsewhere;
-- keep terminology aligned across abstract, introduction, method, experiments, discussion, and conclusion.
-
-When revising text:
-
-- maintain consistent names for methods, modules, datasets, baselines, and metrics;
-- maintain consistent capitalization of technical terms and acronyms;
-- ensure acronym expansion is consistent with first use;
-- ensure the contribution statements remain aligned with the body text.
-
-<!-- CUSTOMIZE: Add any project-specific terminology rules here. -->
-
-If a local edit would create inconsistency with the rest of the paper, flag it explicitly.
+- `paper-model.md` for repository layout, sections, validation commands, and implementation references;
+- `terminology.md` for canonical terms, acronyms, macros, and distinctions;
+- `contributions.md` for approved contribution scope;
+- `evaluation-claims.md` for result claims and evidence boundaries;
+- `claim-ledger.md` and `do-not-say.md` for high-risk claims and prohibited phrasings;
+- `open-findings.md` and `reviewer-contracts.md` for unresolved diagnostics and review-response plans.
 
 ## Technical Content Rules
 
-- Do not add technical claims, assumptions, or results unless supported by the manuscript context.
+- Do not add technical claims, assumptions, results, or citations unless supported by manuscript context or explicitly requested.
 - Do not silently strengthen claims.
 - Do not silently weaken limitations.
-- Do not introduce citations not already present in the bibliography unless explicitly asked.
-- Do not alter equations, symbols, labels, or references unless necessary.
-- Preserve all LaTeX labels, refs, cites, and macros.
-- Preserve comments unless they are obsolete or clearly misleading.
-
-## Structure-Aware Editing
-
-When editing a section, verify alignment with:
-- title and subsection purpose,
-- previous definitions,
-- method terminology,
-- experiment setup,
-- stated contributions,
-- conclusion wording.
-
-When rewriting:
-- preserve paragraph function;
-- preserve the logical sequence;
-- avoid moving content across sections unless explicitly asked.
-
-## Preferred Editing Behavior
-
-For small edits:
-- make the minimal change that resolves the issue.
-
-For larger rewrites:
-- first infer the rhetorical role of the section;
-- then rewrite to improve flow while preserving technical meaning.
-
-For ambiguous passages:
-- prefer a conservative rewrite;
-- if ambiguity cannot be resolved locally, leave a short note explaining the issue.
+- Do not invent implementation details.
+- If the manuscript and implementation disagree, report the discrepancy instead of silently changing either side.
 
 ## LaTeX Handling
 
 - Keep LaTeX syntax valid.
-- Do not break environments, labels, references, or bibliography commands.
-- Do not replace structured LaTeX constructs with plain text.
-- Keep math notation intact unless explicitly asked to revise it.
-- Do not alter formatting macros unless necessary for correctness or consistency.
+- Do not break environments, labels, references, bibliography commands, macros, or math notation.
+- Preserve comments unless they are obsolete or explicitly targeted.
 
-## Validation Workflow
+## Validation
 
-Before editing:
-- inspect the target file;
-- search for related terminology, definitions, and claims in the repository.
+Before editing, inspect the target file and search for related terminology, definitions, and claims. After substantive manuscript edits, run the project’s build and lint commands from `.agents/context/paper-model.md` or the local `Makefile` when available. Report errors, undefined references, missing citations, and warnings introduced by the change.
 
-After editing:
-- verify that references, citations, and labels are intact;
-- check that the revised text matches surrounding style and terminology;
-- compile the manuscript if a build command is available;
-- report any warnings or errors introduced by the change.
+## Plugin and Adapter Metadata
 
-## What to Report Back
-
-When making substantive edits, report:
-- what was changed,
-- why it was changed,
-- any terminology or consistency issues discovered elsewhere,
-- any follow-up sections that may need alignment.
-
-## Non-Goals
-
-Do not:
-- perform broad stylistic normalization across the repository unless explicitly asked;
-- paraphrase purely for variation;
-- replace precise wording with generic wording;
-- invent missing experimental details;
-- modify bibliography entries unless asked.
-
-## Building and Validation
-
-<!-- CUSTOMIZE: Replace with your actual build commands and output paths -->
-
-```bash
-# Build PDF
-make pdf     # or: latexmk -pdf main.tex
-             # output: build/paper.pdf  (adjust as needed)
-
-# Lint (optional — requires chktex)
-make lint    # or: chktex main.tex
-```
-
-## Document Structure
-
-<!-- CUSTOMIZE: Replace with your actual document structure -->
-
-**Entry point:** `main.tex` — document class, packages, `\input`s
-
-**Section files** (in order):
-<!-- Example:
-- `introduction.tex`
-- `background.tex`
-- `method.tex`
-- `evaluation.tex`
-- `conclusion.tex`
--->
-
-**Support files:**
-<!-- Example:
-- `macros.tex` — custom commands
-- `references.bib` — bibliography
--->
-
-## Inline Annotation Commands
-
-<!-- CUSTOMIZE: Update this table to match your actual annotation macros -->
-
-| Command | Color | Purpose |
-|---|---|---|
-| `\todo{text}` | blue | Open task / reminder |
-| `\revise{text}` | purple | Content needing revision |
-| `\red{text}` | red | Highlighted warnings |
-
-## Key Macros
-
-<!-- CUSTOMIZE: Document your project-specific LaTeX macros here. -->
-
-## Implementation Reference (OPTIONAL)
-
-When verifying technical claims in the manuscript, consult the implementation as read-only ground truth. Do not propose code changes during paper tasks.
-
-| What to verify | Where to look |
-|---|---|
-| Type names, data structures, schemas | `<path>` |
-| Running examples referenced in the paper | `<path>` |
-| Runtime behavior, interface method names | `<path>` |
-| Design intent / architecture documentation | `<path>` |
-
-If the manuscript and implementation disagree, report the discrepancy — do not silently update either side.
-
-## Known Implementation Details Easy to Misstate (OPTIONAL)
-
-<!-- OPTIONAL: Document any implementation behaviors that are commonly misdescribed in prose. -->
-
-## Repo-Local Codex Agents
-
-This template mirrors the Claude agent setup with Codex-facing prompt specifications under `.codex/agents/`.
-
-Available agents:
-
-- `writer`
-- `scientific-paper-reviewer`
-- `consistency-auditor`
-- `paper-implementation-checker`
-
-Use these files as the task contract when doing focused work locally or, if the user explicitly asks for sub-agents, when delegating with `spawn_agent`.
-
-## Repo-Local Codex Skills
-
-This template also provides manuscript workflows under `.codex/skills/`:
-
-- `address-reviewer-comment`
-- `find-annotations`
-- `paper-build`
-- `pre-submission`
-- `section-review`
-- `sync-remote`
-- `technical-paragraph-rewrite`
-- `write-to-intent`
-
-Stable manuscript context that would otherwise live in long-running agent memory can be summarized in:
-
-- `.codex/context/manuscript-context.md`
-
-## Codex-Specific Operating Rules
-
-- Treat the manuscript repository as the primary source of truth.
-- Prefer minimal diffs unless the user explicitly requests broader restructuring.
-- For review tasks, findings come first; rewrites come only if requested.
-- For manuscript editing, propose the change first and wait for explicit user approval before modifying files when the workflow calls for a proposal step.
-- If a skill or agent calls for implementation verification, keep the implementation side read-only.
+Do not delete plugin, marketplace, or adapter metadata without verifying its purpose. Workflow content belongs in `.agents/`; packaging metadata may remain under `.agents/plugins/`, `.claude-plugin/`, `.claude/`, `.codex/`, or `plugins/` as required by distribution tooling.
