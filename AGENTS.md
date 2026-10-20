@@ -9,7 +9,7 @@ This file provides repository policy for Codex-style agents. The harness-indepen
 - `.agents/context/` contains focused project context templates and project-specific guardrails.
 - `.claude/`, `.codex/`, and `.pi/` are adapters only. Keep harness-specific settings and plugin metadata there, but do not maintain divergent workflow copies.
 
-When updating workflows, edit `.agents/` first. Use symlinks or generated mirrors for harnesses that require a specific directory layout.
+When updating workflows, edit `.agents/` first. Use generated mirrors for harnesses that require a specific directory layout. Avoid symlinks in Overleaf-compatible repositories.
 
 ## What This Repository Is
 

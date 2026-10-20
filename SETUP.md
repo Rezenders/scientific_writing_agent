@@ -8,8 +8,7 @@ From anywhere, run the conservative installer against your paper repository:
 
 ```bash
 python3 /path/to/scientific_writing_agent/scripts/scientific_writing_agent.py install \
-  --repo-root /path/to/your-paper-repo \
-  --mode symlink
+  --repo-root /path/to/your-paper-repo
 ```
 
 Then validate the installation:
@@ -22,18 +21,12 @@ python3 /path/to/scientific_writing_agent/scripts/scientific_writing_agent.py do
 What this does:
 
 - installs `.agents/` as the canonical workflow layer;
-- links `.agents/agents` and `.agents/skills` to the reusable workflow source by default;
+- copies `.agents/agents` and `.agents/skills` into the paper repository by default;
 - creates local starter templates under `.agents/context/` without overwriting existing context files;
-- creates Claude/Codex adapter symlinks when safe;
+- creates Claude/Codex adapter directories as generated file mirrors;
 - appends a short `.agents/` policy block to `AGENTS.md` and `CLAUDE.md` instead of replacing existing project policy.
 
-If symlinks are not suitable for your environment, use copies:
-
-```bash
-python3 /path/to/scientific_writing_agent/scripts/scientific_writing_agent.py install \
-  --repo-root /path/to/your-paper-repo \
-  --mode copy
-```
+Symlinks are not used because Overleaf does not support them. The installer creates real files for both `.agents/` and harness adapter directories.
 
 To refresh reusable workflows later without overwriting project-specific context:
 
@@ -46,7 +39,7 @@ python3 /path/to/scientific_writing_agent/scripts/scientific_writing_agent.py up
 
 - `.agents/` is canonical.
 - `.claude/`, `.codex/`, and `.pi/` are adapters only.
-- Prefer adapter symlinks or generated mirrors; do not maintain divergent copies of agent and skill instructions.
+- Prefer generated mirrors; do not maintain divergent hand-edited copies of agent and skill instructions.
 - Keep plugin and marketplace metadata if your harness uses it.
 
 ## Project-specific customization
@@ -67,6 +60,21 @@ Manual checklist:
 8. `reviewer-contracts.md` and `open-findings.md` — active review-response and diagnostic state.
 
 Use placeholders such as `<PROJECT_NAME>`, `<MAIN_TEX>`, `<SECTION_FILE>`, `<KEY_MACRO>`, `<IMPLEMENTATION_REFERENCE>`, and `<EVALUATION_CLAIM>` until paper-specific facts are known.
+
+## Optional grammar preferences
+
+`scientific-grammar-review` and its nested reference are installed with the other
+skills and mirrored into Claude/Codex adapter directories. Configure author choices
+in `.agents/context/style-preferences.md`; these are separate from grammatical
+rules. For example, change semicolons from `allowed` to `avoid` for proposed prose.
+The conservative installer and plugin setup seed this file only when missing;
+updates and regeneration preserve an existing copy. This exception does not change
+the plugin's ownership of other managed context files. Explicit task instructions
+and technical precision take precedence over preferences.
+
+Run `/scientific-grammar-review` (Codex: `$scientific-grammar-review`) with a target,
+line range, and optional `Mode: detailed`. Findings remain proposals until the
+author accepts them through the existing writing workflow.
 
 ## Build and validation setup
 
@@ -114,4 +122,4 @@ The repo-local plugin script remains available for projects that want generated 
 python3 plugins/scientific-writing/scripts/setup_paper_project.py --repo-root .
 ```
 
-In plugin-first mode, edit `.scientific-writing.json` and templates under `plugins/scientific-writing/assets/templates/root/.agents/`; rerunning the plugin script rewrites managed outputs and recreates adapter symlinks.
+In plugin-first mode, edit `.scientific-writing.json` and templates under `plugins/scientific-writing/assets/templates/root/.agents/`; rerunning the plugin script rewrites managed outputs and regenerates adapter directories.

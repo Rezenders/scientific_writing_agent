@@ -9,7 +9,7 @@ This file provides guidance to Claude Code when working in this repository. The 
 - `.agents/context/` contains focused project context templates and project-specific guardrails.
 - `.claude/`, `.codex/`, and `.pi/` are adapters only. Preserve harness-specific settings and plugin metadata, but avoid divergent workflow copies.
 
-When updating workflows, edit `.agents/` first and then relink or regenerate harness adapters if needed.
+When updating workflows, edit `.agents/` first and then regenerate harness adapters if needed. Avoid symlinks in Overleaf-compatible repositories.
 
 ## Purpose
 

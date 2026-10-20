@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 import sys
 from pathlib import Path
 from typing import Any
@@ -152,38 +153,31 @@ def should_skip_output(output_rel: Path, config: dict[str, Any]) -> bool:
     return "paper-implementation-checker" in output_posix
 
 
-def ensure_symlink(path: Path, target: str) -> None:
-    if path.is_symlink():
-        if path.readlink().as_posix() == target:
-            return
+def remove_path(path: Path) -> None:
+    if path.is_symlink() or path.is_file():
         path.unlink()
-    elif path.exists():
-        if path.is_dir():
-            for child in path.rglob("*"):
-                if child.is_file() or child.is_symlink():
-                    child.unlink()
-            for child in sorted(path.rglob("*"), reverse=True):
-                if child.is_dir():
-                    child.rmdir()
-            path.rmdir()
-        else:
-            path.unlink()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.symlink_to(target)
+    elif path.is_dir():
+        shutil.rmtree(path)
 
 
-def write_adapter_symlinks(repo_root: Path) -> list[Path]:
-    links = {
-        Path(".claude/agents"): "../.agents/agents",
-        Path(".claude/skills"): "../.agents/skills",
-        Path(".codex/agents"): "../.agents/agents",
-        Path(".codex/skills"): "../.agents/skills",
-        Path(".codex/context"): "../.agents/context",
+def write_adapter_mirrors(repo_root: Path) -> list[Path]:
+    mirrors = {
+        Path(".claude/agents"): Path(".agents/agents"),
+        Path(".claude/skills"): Path(".agents/skills"),
+        Path(".codex/agents"): Path(".agents/agents"),
+        Path(".codex/skills"): Path(".agents/skills"),
+        Path(".codex/context"): Path(".agents/context"),
     }
     written: list[Path] = []
-    for rel, target in links.items():
+    for rel, source_rel in mirrors.items():
         path = repo_root / rel
-        ensure_symlink(path, target)
+        source = repo_root / source_rel
+        if not source.exists():
+            continue
+        if path.exists() or path.is_symlink():
+            remove_path(path)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(source, path, symlinks=False)
         written.append(path)
     return written
 
@@ -203,13 +197,19 @@ def write_outputs(repo_root: Path, template_root: Path, config: dict[str, Any]) 
             continue
 
         output_path = repo_root / output_rel
+        # Unlike managed workflows, author preferences are project-owned in both
+        # installation modes. Seed once and preserve on regeneration.
+        if output_rel == Path(".agents/context/style-preferences.md") and output_path.exists():
+            if not output_path.is_file():
+                raise IsADirectoryError(f"Preference path is not a file: {output_path}")
+            continue
         if output_path.exists() and output_path.is_dir():
             raise IsADirectoryError(f"Output path is a directory: {output_path}")
         output_path.parent.mkdir(parents=True, exist_ok=True)
         rendered = render_text(template_path.read_text(encoding="utf-8"), config)
         output_path.write_text(rendered, encoding="utf-8")
         written.append(output_path)
-    written.extend(write_adapter_symlinks(repo_root))
+    written.extend(write_adapter_mirrors(repo_root))
     return written
 
 

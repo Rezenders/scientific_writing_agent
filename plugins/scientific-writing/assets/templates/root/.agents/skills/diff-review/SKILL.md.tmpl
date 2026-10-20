@@ -32,6 +32,15 @@ Use `.agents/agents/scientific-paper-reviewer.md` on each changed passage (befor
 
 Report: files and hunks reviewed, consistency findings, scientific findings, CLEAN / MINOR ISSUES / NEEDS ATTENTION verdict, and recommended actions.
 
+## Optional grammar focus
+
+When the author requests focused grammar diagnosis, use
+`.agents/skills/scientific-grammar-review/SKILL.md` on the relevant passage with
+context. Do not add a grammar pass by default. Merge duplicate diagnoses and
+preserve this workflow's report, scope, and human findings gate. Return structural
+recommendations separately; do not supply a rewritten passage or pass unapproved
+findings to the writer.
+
 ## Constraints
 
 - Review only what changed. Do not report pre-existing issues in unchanged text.

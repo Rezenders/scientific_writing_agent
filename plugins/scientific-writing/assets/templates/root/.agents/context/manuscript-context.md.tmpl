@@ -13,6 +13,7 @@ Compact index for reusable scientific-writing context. Keep this file short and 
 ## Focused Context Files
 
 - `paper-model.md` — repository layout, section map, validation commands, implementation references.
+- `style-preferences.md` — optional author preferences, separate from grammatical rules.
 - `terminology.md` — canonical terms, acronyms, macros, and forbidden variants.
 - `contributions.md` — approved contribution wording and narrative commitments.
 - `evaluation-claims.md` — evidence-backed evaluation claims and limits.

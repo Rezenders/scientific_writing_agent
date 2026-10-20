@@ -67,7 +67,6 @@ class SetupPaperProjectTests(unittest.TestCase):
 
             self.assertEqual((root / "AGENTS.md").read_text(encoding="utf-8"), "Title: My Paper")
             self.assertFalse((root / ".agents" / "agents" / "paper-implementation-checker.md").exists())
-            self.assertTrue((root / ".codex" / "agents").is_symlink())
             self.assertIn(root / "AGENTS.md", written)
 
     def test_ensure_config_creates_file_from_template_if_missing(self):

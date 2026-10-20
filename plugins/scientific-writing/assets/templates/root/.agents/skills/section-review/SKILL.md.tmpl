@@ -91,6 +91,15 @@ READY | NEEDS REVISION | MAJOR ISSUES
 
 Prioritize technical-correctness issues ahead of consistency and style issues. If neighboring sections were not provided, state that cross-section alignment could only be assessed partially.
 
+## Optional grammar focus
+
+When the author requests focused grammar diagnosis, use
+`.agents/skills/scientific-grammar-review/SKILL.md` on the relevant passage with
+context. Do not add a grammar pass by default. Merge duplicate diagnoses and
+preserve this workflow's report, scope, and human findings gate. Return structural
+recommendations separately; do not supply a rewritten passage or pass unapproved
+findings to the writer.
+
 ## Constraints
 
 - Do not edit files.

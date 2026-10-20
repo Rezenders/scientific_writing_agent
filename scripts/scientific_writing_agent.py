@@ -3,13 +3,12 @@
 
 The installer is intended for existing paper repositories. It keeps `.agents/`
 as the canonical workflow layer, preserves project-specific context by default,
-and creates thin Claude/Codex adapter symlinks when safe.
+and creates generated Claude/Codex adapter mirrors for tools that do not support symlinks.
 """
 
 from __future__ import annotations
 
 import argparse
-import os
 import shutil
 import sys
 from pathlib import Path
@@ -26,16 +25,17 @@ CONTEXT_FILES = (
     "do-not-say.md",
     "open-findings.md",
     "reviewer-contracts.md",
+    "style-preferences.md",
 )
-ADAPTER_LINKS = {
-    Path(".claude/agents"): "../.agents/agents",
-    Path(".claude/skills"): "../.agents/skills",
-    Path(".codex/agents"): "../.agents/agents",
-    Path(".codex/skills"): "../.agents/skills",
-    Path(".codex/context"): "../.agents/context",
+ADAPTER_SOURCES = {
+    Path(".claude/agents"): Path(".agents/agents"),
+    Path(".claude/skills"): Path(".agents/skills"),
+    Path(".codex/agents"): Path(".agents/agents"),
+    Path(".codex/skills"): Path(".agents/skills"),
+    Path(".codex/context"): Path(".agents/context"),
 }
 POLICY_MARKER = "<!-- scientific-writing-agent canonical-workflow -->"
-POLICY_BLOCK = f"""\n{POLICY_MARKER}\n\n## Scientific-Writing Agent Workflow\n\nThis project uses `.agents/` as the canonical shared workflow layer:\n\n- `.agents/agents/` contains reusable agent role instructions.\n- `.agents/skills/` contains reusable manuscript workflows.\n- `.agents/context/` contains project-specific scientific context and guardrails.\n\nHarness-specific directories such as `.claude/`, `.codex/`, and `.pi/` are adapters only. Prefer symlinks or generated mirrors rather than divergent copies. Reviewer and critic agents diagnose only; the writer uses an author-approved passage contract, human-approved findings, and at most one targeted revision.\n"""
+POLICY_BLOCK = f"""\n{POLICY_MARKER}\n\n## Scientific-Writing Agent Workflow\n\nThis project uses `.agents/` as the canonical shared workflow layer:\n\n- `.agents/agents/` contains reusable agent role instructions.\n- `.agents/skills/` contains reusable manuscript workflows.\n- `.agents/context/` contains project-specific scientific context and guardrails.\n\nHarness-specific directories such as `.claude/`, `.codex/`, and `.pi/` are adapters only. Prefer generated mirrors rather than divergent hand-maintained copies, especially for Overleaf-compatible repositories where symlinks are not supported. Reviewer and critic agents diagnose only; the writer uses an author-approved passage contract, human-approved findings, and at most one targeted revision.\n"""
 
 
 def repo_default_source() -> Path:
@@ -47,9 +47,9 @@ def build_parser() -> argparse.ArgumentParser:
     parser.add_argument("command", choices=("install", "update", "doctor"), nargs="?", default="install")
     parser.add_argument("--repo-root", default=".", help="Target paper repository root.")
     parser.add_argument("--source-root", default=None, help="Source scientific_writing_agent repository root.")
-    parser.add_argument("--mode", choices=("symlink", "copy"), default="symlink", help="Install reusable agents/skills as symlinks or copies.")
+    parser.add_argument("--mode", choices=("copy",), default="copy", help="Compatibility option; reusable workflows are installed as real files.")
     parser.add_argument("--force", action="store_true", help="Replace existing reusable workflow paths when needed.")
-    parser.add_argument("--force-adapters", action="store_true", help="Replace existing Claude/Codex adapter directories with symlinks.")
+    parser.add_argument("--force-adapters", action="store_true", help="Replace existing Claude/Codex adapter directories with generated mirrors.")
     parser.add_argument("--no-policy-block", action="store_true", help="Do not create or append AGENTS.md / CLAUDE.md policy blocks.")
     return parser
 
@@ -77,7 +77,7 @@ def same_target(path: Path, target: Path) -> bool:
         return False
 
 
-def install_dir(source: Path, dest: Path, mode: str, force: bool, actions: list[str]) -> None:
+def install_dir(source: Path, dest: Path, force: bool, actions: list[str]) -> None:
     if same_target(dest, source):
         actions.append(f"kept existing source path {dest}")
         return
@@ -87,13 +87,8 @@ def install_dir(source: Path, dest: Path, mode: str, force: bool, actions: list[
             return
         remove_path(dest)
     dest.parent.mkdir(parents=True, exist_ok=True)
-    if mode == "symlink":
-        dest.symlink_to(source.resolve(), target_is_directory=True)
-        actions.append(f"linked {dest} -> {source.resolve()}")
-    else:
-        shutil.copytree(source, dest)
-        actions.append(f"copied {source} -> {dest}")
-
+    shutil.copytree(source, dest, symlinks=False)
+    actions.append(f"copied {source} -> {dest}")
 
 def copy_file_if_missing(source: Path, dest: Path, force: bool, actions: list[str]) -> None:
     if same_target(dest, source):
@@ -109,19 +104,20 @@ def copy_file_if_missing(source: Path, dest: Path, force: bool, actions: list[st
     actions.append(f"copied {source} -> {dest}")
 
 
-def ensure_adapter_link(repo_root: Path, rel: Path, target: str, force: bool, actions: list[str], warnings: list[str]) -> None:
+def ensure_adapter_mirror(repo_root: Path, rel: Path, source_rel: Path, force: bool, actions: list[str], warnings: list[str]) -> None:
     path = repo_root / rel
-    if path.is_symlink() and os.readlink(path) == target:
-        actions.append(f"adapter OK {rel} -> {target}")
+    source = repo_root / source_rel
+    if not source.exists():
+        warnings.append(f"cannot create adapter {rel}; missing source {source_rel}")
         return
     if path.exists() or path.is_symlink():
         if not force:
-            warnings.append(f"kept existing adapter {rel}; use --force-adapters to replace with {target}")
+            warnings.append(f"kept existing adapter {rel}; use --force-adapters to regenerate from {source_rel}")
             return
         remove_path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.symlink_to(target, target_is_directory=True)
-    actions.append(f"linked adapter {rel} -> {target}")
+    shutil.copytree(source, path, symlinks=False)
+    actions.append(f"generated adapter mirror {rel} from {source_rel}")
 
 
 def append_policy_block(repo_root: Path, filename: str, actions: list[str]) -> None:
@@ -151,7 +147,7 @@ def install_or_update(args: argparse.Namespace, update_only: bool = False) -> tu
 
     force_reusable = args.force or update_only
     for name in AGENT_DIRS:
-        install_dir(source_root / ".agents" / name, target_agents / name, args.mode, force_reusable, actions)
+        install_dir(source_root / ".agents" / name, target_agents / name, force_reusable, actions)
 
     copy_file_if_missing(source_root / ".agents" / "HARNESS.md", target_agents / "HARNESS.md", force_reusable, actions)
 
@@ -161,10 +157,14 @@ def install_or_update(args: argparse.Namespace, update_only: bool = False) -> tu
         for name in CONTEXT_FILES:
             copy_file_if_missing(source_root / ".agents" / "context" / name, context_dest / name, False, actions)
     else:
+        # New preference defaults are safe to add on upgrades, never to overwrite.
+        copy_file_if_missing(source_root / ".agents/context/style-preferences.md",
+                             context_dest / "style-preferences.md", False, actions)
         actions.append("left .agents/context project-specific files unchanged")
 
-    for rel, target in ADAPTER_LINKS.items():
-        ensure_adapter_link(repo_root, rel, target, args.force_adapters, actions, warnings)
+    force_adapters = args.force_adapters or update_only
+    for rel, source_rel in ADAPTER_SOURCES.items():
+        ensure_adapter_mirror(repo_root, rel, source_rel, force_adapters, actions, warnings)
 
     if not args.no_policy_block and not update_only:
         append_policy_block(repo_root, "AGENTS.md", actions)
@@ -211,12 +211,13 @@ def doctor(repo_root: Path) -> tuple[list[str], list[str]]:
             errors.extend(fm_errors)
         else:
             checks.append("OK skill frontmatter")
-    for rel, target in ADAPTER_LINKS.items():
+    for rel, source_rel in ADAPTER_SOURCES.items():
         path = repo_root / rel
-        if path.is_symlink() and os.readlink(path) == target and path.exists():
-            checks.append(f"OK {rel} -> {target}")
-        elif path.exists():
-            errors.append(f"adapter is not canonical symlink: {rel}")
+        source = repo_root / source_rel
+        if path.is_symlink():
+            errors.append(f"adapter must be a generated directory, not a symlink: {rel}")
+        elif path.exists() and path.is_dir() and source.exists():
+            checks.append(f"OK generated adapter {rel}")
         else:
             errors.append(f"missing adapter {rel}")
     for filename in ("AGENTS.md", "CLAUDE.md"):

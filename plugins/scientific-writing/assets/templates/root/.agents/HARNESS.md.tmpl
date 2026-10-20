@@ -7,15 +7,16 @@ This repository keeps reusable scientific-writing workflows in `.agents/` so the
 - `.agents/agents/` contains reusable diagnostic and drafting agent instructions.
 - `.agents/skills/` contains task workflows.
 - `.agents/context/` contains project-specific scientific context, templates, and guardrails.
-- Harness-specific directories such as `.claude/`, `.codex/`, and `.pi/` are adapters only. They should be symlinks, generated mirrors, or small configuration layers, not independent workflow forks.
+- Harness-specific directories such as `.claude/`, `.codex/`, and `.pi/` are adapters only. They should be generated mirrors or small configuration layers, not independent workflow forks. Avoid symlinks in Overleaf-compatible repositories.
 
-Avoid duplicated divergent definitions. When workflow policy changes, update `.agents/` first and regenerate or relink harness adapters.
+Avoid duplicated divergent definitions. When workflow policy changes, update `.agents/` first and regenerate harness adapters.
 
 ## Adapter Rules
 
 - Preserve harness-specific settings, plugin metadata, marketplace manifests, trust files, and model configuration.
-- Prefer symlinks from `.claude/agents` and `.codex/agents` to `.agents/agents`, and from `.agents/skills` and `.codex/skills` to `.agents/skills`, when the harness supports symlink discovery.
-- If a harness cannot follow symlinks, keep generated mirrors and document the generation command; do not hand-edit the mirror.
+- Prefer generated mirrors from `.agents/agents` and `.agents/skills` into harness-specific directories when a harness requires those paths.
+- Do not hand-edit generated mirrors. Update `.agents/` first, then regenerate adapters.
+- Do not use symlinks for repositories synchronized with Overleaf.
 - Do not store scientific facts in harness prompts. Store them in `.agents/context/` and load only the files needed for the task.
 
 ## Progressive Disclosure

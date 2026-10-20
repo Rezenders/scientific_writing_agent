@@ -36,6 +36,7 @@ A Claude Code and Codex configuration template for writing scientific papers in 
 
 | Skill | When to use |
 |---|---|
+| `/scientific-grammar-review` | Focused read-only grammar and syntax diagnosis, with optional educational explanations and structural proposals. |
 | `/section-review` | After rewriting a full section — runs scientific review + consistency audit in parallel and produces a unified report. |
 | `/write-to-intent` | When you want to write or substantially rewrite a passage toward a stated rhetorical goal. Proposes multiple directions, gets your approval, then drafts and refines. |
 | `/address-reviewer-comment` | When a reviewer (human or agent) targets a specific paragraph. Generates revision strategies, writes proposals, reviews them, and holds for your approval before touching the file. |
@@ -56,7 +57,49 @@ A Claude Code and Codex configuration template for writing scientific papers in 
 
 In Claude Code, each skill is a slash command you type directly.
 
-The canonical workflow files live under `.agents/`. Harness-specific directories such as `.claude/` and `.codex/` should be thin symlinks or generated adapters to `.agents/`, not independent workflow copies.
+The canonical workflow files live under `.agents/`. Harness-specific directories such as `.claude/` and `.codex/` should be generated adapters from `.agents/`, not independent hand-maintained workflow copies. Symlinks are avoided by default for Overleaf compatibility.
+
+## Scientific Grammar Review
+
+Use `/scientific-grammar-review` for grammatical correctness, syntactic ambiguity,
+and constructions that obscure scientific relationships. It distinguishes
+`GRAMMATICAL_ERROR`, `CLARITY_PROBLEM`, and `STYLE_PREFERENCE`. Unlike the prose
+reviewer's general clarity, concision, cohesion, and readability check, this skill
+explains the relevant grammatical structures and checks their legitimate uses.
+It does not penalize passive voice, nominalization, long sentences, copulas,
+relative clauses, or technical repetition simply because they occur.
+
+```text
+/scientific-grammar-review
+
+Target: methods.tex
+Scope: lines 40-65, with neighboring sentences
+Mode: detailed
+Focus: syntactic clarity, grammatical correctness, unnecessary nominalization,
+       ambiguous references
+```
+
+In Codex, invoke `$scientific-grammar-review` with the same inputs. Concise mode is
+the default; detailed mode adds linguistic explanations, transformation reasoning,
+and counterexamples. Reports prioritize supported findings with location, rule ID,
+classification, evidence, explanation, preferred structure, severity, and confidence.
+A clear passage returns `CLEAN`. Suggestions remain unapplied proposals; the skill
+never edits a manuscript or produces a rewritten passage automatically.
+
+The existing `writer` independently resolves only findings the author accepts,
+through the passage contract and existing single-revision workflow. Grammar review
+is an optional focus in `write-to-intent`, `section-review`, and `diff-review`; it
+does not add a mandatory review pass. The prose reviewer may consult a relevant
+reference section for a specific syntactic problem while retaining its own format.
+
+Configure author preferences in `.agents/context/style-preferences.md`. Both
+installation paths seed it once and preserve edits on updates and regeneration.
+Direct predication and concise technical wording are preferences, not English
+grammar rules. Semicolons are allowed by default; change the preference to `avoid`
+for proposed manuscript prose if desired. Scientific precision takes precedence.
+The reference is loaded by relevant rule sections, rather than placed in every
+agent prompt. Canonical sources are under `.agents/`; matching plugin templates
+and generated Claude/Codex mirrors distribute the skill and its nested reference.
 
 ## Codex Plugin
 
@@ -454,22 +497,18 @@ For an existing paper project, use the conservative installer rather than copyin
 ```bash
 # From anywhere:
 python3 /path/to/scientific_writing_agent/scripts/scientific_writing_agent.py install \
-  --repo-root /path/to/your-paper-repo \
-  --mode symlink
+  --repo-root /path/to/your-paper-repo
 ```
 
-This installs `.agents/`, creates Claude/Codex adapter symlinks when safe, appends a short policy block to `AGENTS.md` and `CLAUDE.md`, and preserves project-specific context files by default.
+This installs `.agents/`, creates Claude/Codex adapter directories as generated file mirrors, appends a short policy block to `AGENTS.md` and `CLAUDE.md`, and preserves project-specific context files by default.
 
 Useful variants:
 
 ```bash
-# Copy reusable files instead of symlinking to this repository
-python3 /path/to/scientific_writing_agent/scripts/scientific_writing_agent.py install --repo-root . --mode copy
-
 # Refresh reusable agents/skills later without overwriting project context
 python3 /path/to/scientific_writing_agent/scripts/scientific_writing_agent.py update --repo-root .
 
-# Check symlinks, skill frontmatter, and policy references
+# Check generated adapters, skill frontmatter, and policy references
 python3 /path/to/scientific_writing_agent/scripts/scientific_writing_agent.py doctor --repo-root .
 ```
 

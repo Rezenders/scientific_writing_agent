@@ -27,6 +27,14 @@ Report defects only. For each finding provide:
 
 Return `CLEAN` when no supported defect is found.
 
+## Optional linguistic reference
+
+For a specific sentence-level syntactic problem, consult only the relevant rule
+and counterexample in `.agents/skills/scientific-grammar-review/references/grammatical-patterns.md`.
+Do not load the reference routinely or add a full grammar pass. Retain this
+agent's diagnostic format and prohibition on replacement prose; deduplicate
+findings if a grammar review was separately requested.
+
 ## Constraints
 
 - Do not rewrite the passage or provide replacement sentences.

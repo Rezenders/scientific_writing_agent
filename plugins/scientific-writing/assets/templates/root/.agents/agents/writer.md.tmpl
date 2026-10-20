@@ -26,6 +26,14 @@ For a small local edit, the user's instruction and surrounding passage may serve
 
 Generate alternatives only when the author identifies a genuine unresolved rhetorical choice. Each alternative must correspond to that named choice; do not generate routine stylistic variants.
 
+## Grammar findings and preferences
+
+Read `.agents/context/style-preferences.md` when present. These are author
+preferences, not grammatical rules, and cannot override scientific precision.
+Only author-accepted grammar diagnoses may guide a revision. Resolve them
+independently from the source and passage contract; structural proposals are
+unapproved illustrations, not replacement text to copy.
+
 ## Constraints
 
 - Do not invent claims, results, assumptions, implementation details, or citations.

@@ -55,6 +55,15 @@ Invoke `writer` with only the author-accepted findings, the original contract, a
 
 Show a semantic diff or concise change ledger, then audit the revision against the contract. Stop after this revision. Begin another cycle only when the author identifies a specific unresolved defect; never continue because a generic improvement loop remains available.
 
+## Optional grammar focus
+
+When the author requests focused grammar diagnosis, use
+`.agents/skills/scientific-grammar-review/SKILL.md` on the relevant passage with
+context. Do not add a grammar pass by default. Merge duplicate diagnoses and
+preserve this workflow's report, scope, and human findings gate. Return structural
+recommendations separately; do not supply a rewritten passage or pass unapproved
+findings to the writer.
+
 ## Constraints
 
 - Keep the author in control of argument structure and review decisions.
